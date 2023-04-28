@@ -11,12 +11,36 @@
  */ 
 
 
-
+/*Calcula 2 a la N potencia*/
  pot_2(N, R) :- R is ceil(log(N)/log(2)).
 
+/*Devuelve el valor de la posición en la grilla*/
  getValue(Grid, [X,Y] , NumOfColumns, Val):- Celda is X*NumOfColumns+Y, nth0(Celda, Grid, Val).
 
+/*Reemplaza el elemento de la posición por un nuevo elemento*/
  replace(Grid, NumOfColumns, [X,Y], Value, NewGrid) :-
     Index is X * NumOfColumns + Y,
     nth0(Index, Grid, _, TempGrid),
     nth0(Index, NewGrid, Value, TempGrid).
+
+/*Devuelve la sumatoria de los valores de las posiciones en la grilla*/
+ sumatoria(_, _, [], 0).
+ sumatoria(Grid, NumOfColumns, [[X,Y]|T], Res) :- 
+   sumatoria(Grid, NumOfColumns, T, ResAux),
+   getValue(Grid, [X,Y], NumOfColumns, Val),
+   Res is ResAux+Val.
+
+/** Se encarga de settear en 0 las posiciones de la grilla. 
+*Excepto a la última posición, que es cambiada por el valor que se pase en Val
+*por ejemplo, una potencia de 2 ;) 
+*/
+
+pathDLT(Grid, NumOfColumns,[[X,Y]], Val, NewGrid) :- 
+   replace(Grid, NumOfColumns, [X,Y], Val, NewGrid).
+
+pathDLT(Grid, NumOfColumns, [[X,Y]|T], Val, NewGrid) :-
+  pathDLT(Grid, NumOfColumns, T, Val, TempGrid),
+  replace(TempGrid, NumOfColumns, [X,Y], 0, NewGrid).  
+
+
+
