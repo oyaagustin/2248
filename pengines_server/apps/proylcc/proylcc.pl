@@ -15,11 +15,11 @@
  pot_2(N, R) :- R is ceil(log(N)/log(2)).
 
 /*Devuelve el valor de la posición en la grilla*/
- getValue(Grid, [X,Y] , NumOfColumns, Val):- Celda is X*NumOfColumns+Y, nth0(Celda, Grid, Val).
+ getValue(Grid, [X,Y], NumOfColumns, Val):- Celda is Y*NumOfColumns+X, nth0(Celda, Grid, Val).
 
 /*Reemplaza el elemento de la posición por un nuevo elemento*/
  replace(Grid, NumOfColumns, [X,Y], Value, NewGrid) :-
-    Index is X * NumOfColumns + Y,
+    Index is Y * NumOfColumns + X,
     nth0(Index, Grid, _, TempGrid),
     nth0(Index, NewGrid, Value, TempGrid).
 
