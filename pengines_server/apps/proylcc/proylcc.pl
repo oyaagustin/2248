@@ -14,6 +14,9 @@
 /*Calcula 2 a la N potencia*/
  pot_2(N, R) :- R is ceil(log(N)/log(2)).
 
+/*Devuelve una potencia aleatoria de 2*/
+ random_pot(R) :- random_between(1,5, N), R is 2**N.
+
 /*Devuelve el valor de la posición en la grilla*/
  getValue(Grid, [X,Y], NumOfColumns, Val):- Celda is Y*NumOfColumns+X, nth0(Celda, Grid, Val).
 
