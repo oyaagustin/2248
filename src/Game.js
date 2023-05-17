@@ -43,6 +43,21 @@ function Game() {
     }
     setPath(newPath);
     console.log(JSON.stringify(newPath));
+    calcularPrediccion(newPath);
+  }
+
+  function calcularPrediccion(newPath) {
+    const gridS = JSON.stringify(grid);
+    const pathS = JSON.stringify(newPath);
+    const queryS = "prediccion(" + gridS + "," + numOfColumns + "," + pathS + ",Res)";
+    pengine.query(queryS, (success, response) => {
+      if (success) {
+        const res = response['Res'];
+        document.getElementById("prediccion").innerHTML=res;
+      } else {
+        setWaiting(false);
+      }
+    });
   }
 
   /**
@@ -91,9 +106,25 @@ function Game() {
     if (restRGrids.length > 0) {
       setTimeout(() => {
         animateEffect(restRGrids);
-      }, 1000);
+      }, 100);
     } else {
       setWaiting(false);
+    }
+  }
+
+  function onClickBooster() {     
+    if(!waiting){
+      const gridS = JSON.stringify(grid);
+      const queryS = "boosterColapser(" + gridS + "," + numOfColumns + ", RGrids)";    
+      pengine.query(queryS, (success, response) => {        
+      if (success) {                    
+        setWaiting(true);
+        animateEffect(response['RGrids'], 400);              
+      } else {
+        setWaiting(false);
+      }        
+    }); 
+    setWaiting(false);
     }
   }
 
@@ -112,6 +143,14 @@ function Game() {
         onPathChange={onPathChange}
         onDone={onPathDone}
       />
+      <div className="herramientas">
+        <div className="booster" onClick={onClickBooster}>
+          booster colapsar
+        </div>
+        <div id="prediccion" className="booster" > 
+          0
+        </div>
+      </div>
     </div>
   );
 }

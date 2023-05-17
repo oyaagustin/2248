@@ -1,3 +1,7 @@
+html{
+  background-color: #3F3F3F;
+}
+
 body {
   font: 14px "Century Gothic", Futura, sans-serif;
   margin: 20px;
@@ -7,6 +11,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  
 }
 
 .header {
@@ -43,6 +48,23 @@ body {
   color: white;
   font-family: Arial, Helvetica, sans-serif;
   cursor: pointer;
+}
+
+.herramientas > div{
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.booster {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5px;
 }
 
 .rise {
