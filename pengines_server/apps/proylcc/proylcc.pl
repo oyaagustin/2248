@@ -6,8 +6,8 @@
 	]).
 
 /**
- * RGrids es la lista de grillas representando el efecto, en etapas, de combinar las celdas del camino Path
- * en la grilla Grid, con número de columnas NumOfColumns. El número 0 representa que la celda está vacía. 
+  * RGrids es la lista de grillas representando el efecto, en etapas, de combinar las celdas del camino Path
+  * en la grilla Grid, con número de columnas NumOfColumns. El número 0 representa que la celda está vacía. 
  */
 join(Grid, NumOfColumns, Path, RGrids) :-
     sumatoria(Grid, NumOfColumns, Path, Sum),
@@ -17,16 +17,16 @@ join(Grid, NumOfColumns, Path, RGrids) :-
     get_filas(PathDLT, Filas),
     gravedad(NewGrid,Filas,NumOfColumns, RGrids).
 
-/**Devuelve el resultado preliminar.
-*/
+/*Devuelve el resultado preliminar.*/
 prediccion(Grid, NumOfColumns, Path, Res) :- 
     sumatoria(Grid, NumOfColumns, Path, Sum),
     pot_2(Sum, Res).
     
-/**Power up. Colapsa todos los grupos de bloques adyacentes
-* y de igual valor reemplazándolos por un bloque numérico
-* calculado como la menor potencia de 2 mayor o igual a sumatoria de los bloques
-* del grupo.
+/**
+ * Power up. Colapsa todos los grupos de bloques adyacentes
+ * y de igual valor reemplazándolos por un bloque numérico
+ * calculado como la menor potencia de 2 mayor o igual a sumatoria de los bloques
+ * del grupo.
 */
 
 boosterColapser(Grid, NumOfColumns, RGrids):-
@@ -42,31 +42,55 @@ boosterColapser(Grid, NumOfColumns, RGrids):-
     get_filas(PosicionesVacias, Filas),
     gravedad(GrillaIntermedia2,Filas,NumOfColumns, RGrids).
     
+
+/**
+ * Toma dos listas, una con posiciones y otra con valores,
+ * reemplaza los valores originales de las posiciones con
+ * los valores de la lista de valores.
+*/
 reemplazarTodos(Grid, _, [], [], Grid).
+
 reemplazarTodos(Grid, NumOfColumns, [Pos|PosList], [Value|ValueList], FinalGrid) :-
     replace(Grid, NumOfColumns, Pos, Value, NewGrid),
     reemplazarTodos(NewGrid, NumOfColumns, PosList, ValueList, FinalGrid).
 
+/**
+ * Concatena listas.
+*/
 concatenar([], []).
 concatenar([L|Ls], Res) :-
     concatenar(Ls, Res1),
     append(L, Res1, Res).
 
+/**
+ * Dada una lista de listas, elimina todos los últimos elementos de
+ * las listas dentro de la lista.
+*/
 eliminarTodosUltimo([], []).
 eliminarTodosUltimo([L1|Ls1], [L2|Ls2]) :-
     eliminar_ultimo(L1, L2),
     eliminarTodosUltimo(Ls1, Ls2).
 
+/**
+ * Elimina el último elemento de una lista.
+*/
 eliminar_ultimo([], []).
 eliminar_ultimo([_], []).
 eliminar_ultimo([X|Xs], [X|Ys]) :-
     eliminar_ultimo(Xs, Ys).
 
+/**
+ * Devuelve el último elemento de una lista.
+*/
 getUltimo([], []).
 getUltimo([H|T], [X|Rest]) :- 
     reverse(H, [X|_]),
     getUltimo(T, Rest).
 
+/**
+ * Opera sobre una lista de listas, devuelve una lista que contiene
+ * los resultados de la sumatoria de las listas dentro de la lista.
+*/
 getListaSumatoria(_, _, [], []).
 getListaSumatoria(Grid, NumOfColumns, [L|Ls], [Sum|Sums]) :-
     sumatoria(Grid, NumOfColumns, L, TSum),
@@ -87,7 +111,7 @@ subListSort([L|S], [SL|SortLists]) :-
     
 
 /*Calcula 2 a la N potencia*/
- pot_2(N, R) :- R is 2**floor(log(N)/log(2)).
+ pot_2(N, R) :- R is 2**ceil(log(N)/log(2)).
 
 /*Devuelve una potencia de 2 aleatoria usando como techo el máximo elemento de la grilla*/
 random_pot(Grid, R) :-  
@@ -139,9 +163,10 @@ swap(Grid,[X,Y], NumOfColumns, NewGrid) :-
 	replace(Grid, NumOfColumns, [X,Y], Val_arriba, TGrid),
 	replace(TGrid, NumOfColumns, [Xminus,Y], Val_abajo, NewGrid).
 
-/**Se encarga de generar el efecto de gravedad sobre una columna.
-* Toma una posición y la "sube" hasta sacarla de la grilla,
-* seteando un valor en el lugar más alto.  
+/**
+ * Genera el efecto de gravedad sobre una columna.
+ * Toma una posición y la "sube" hasta sacarla de la grilla,
+ * seteando un valor en el lugar más alto.  
 */
 subir(Grid,[0,Y], NumOfColumns, Valor, NewGrid):-
 	replace(Grid, NumOfColumns, [0,Y], Valor, NewGrid).
@@ -150,8 +175,9 @@ subir(Grid,[X,Y], NumOfColumns, Valor, NewGrid) :-
 	swap(Grid,[X,Y], NumOfColumns, TGrid),
 	subir(TGrid, [Xminus,Y], NumOfColumns, Valor, NewGrid).
 
-/*Se encarga de separar la lista en una lista de 
- * sublistas que representanlas filas :)
+/**
+ * Se encarga de separar la lista en una lista de 
+ * sublistas que representan las filas :)
 */
 get_filas(List, Result) :-
     findall(X, member([X,_], List), XValues),
@@ -164,7 +190,8 @@ get_filas_aux([X|XValues], List, [Sublist|Result]) :-
     get_filas_aux(XValues, List, Result).
 
 
-/**Sube cada elemento de la lista y setea una potencia de 
+/**
+ * Sube cada elemento de la lista y setea una potencia de 
  * 2 aleatoria.
 */
 subir_fila(Grid,[],_,Grid).
@@ -175,7 +202,8 @@ subir_fila(Grid, [[X,Y]|T], NumOfColumns, NewGrid):-
     subir_fila(TempGrid, T, NumOfColumns, NewGrid).
     
 /**
- * 
+ * Dada una lista de filas, se encarga de aplicar efecto 
+ * de gravedad sobre cada fila.
 */
 gravedad(Grid, [], _, [Grid]).
 gravedad(Grid, [Fila|Filas], NumOfColumns, [Grid|RGrids]) :-
@@ -190,35 +218,34 @@ mismoValor(Grid, NumOfColumns, [X1,Y1], [X2,Y2]) :-
     nth0(Pos1, Grid, Value),
     nth0(Pos2, Grid, Value).
 
-/*Comprueba si dos números son adyacentes, o devuelve un número adyacente*/
+/* Comprueba si dos números son adyacentes, o devuelve un número adyacente*/
 adyacente([X,Y], NumOfColumns, NumOfRows, [X2,Y2]):-
     between(-1,1, V1), X2 is X+V1,
     between(-1,1, V2), Y2 is Y+V2,
      (\+ ([X2,Y2] = [X,Y])),
     validatePos([X2,Y2], NumOfColumns, NumOfRows).
 
-/*Comprueba que una posición esté dentro del arreglo*/
+/* Comprueba que una posición esté dentro del arreglo*/
 validatePos([X2,Y2], NumOfColumns, NumOfRows) :-
     X2 >= 0, Y2 >= 0, 
     X2 < NumOfRows, Y2 < NumOfColumns.
 
-/*Devuelve todos los adyacentes iguales al elemento de la posición dada*/
+/* Devuelve todos los adyacentes iguales al elemento de la posición dada*/
 findAdy(Grid, [X,Y], NumOfColumns, NumOfRows, Adyacentes):-
     findall([Xa,Ya],(adyacente([X,Y], NumOfColumns, NumOfRows, [Xa,Ya]), 
                     mismoValor(Grid, NumOfColumns, [X,Y], [Xa,Ya])),Adyacentes).
 
-/*Calcula la siguiente posición, devuelve falso si se está en una posición inválida o final*/
+/* Calcula la siguiente posición, devuelve falso si se está en una posición inválida o final*/
 nextPos([X,Y], NumOfColumns, NumOfRows, [NX,NY]) :-
     NX is (X + ((Y+1) // NumOfColumns)),
     NY is (Y+1) mod NumOfColumns,
     validatePos([NX,NY], NumOfColumns, NumOfRows).
 
-/*Calcula el número de filas de la grilla*/
+/* Calcula el número de filas de la grilla*/
 numOfRows(Grid, NumOfColumns, Rows):-
     length(Grid, L), Rows is ceiling(L/NumOfColumns).
 
-/**Encuentra todos los caminos posibles de la grilla.
-*/
+/* Encuentra todos los caminos posibles de la grilla*/
 findPaths(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoActual, CaminosFinales):-
     nextPos([X,Y], NumOfColumns, NumOfRows, [Nx,Ny]), \+ member([X,Y], Visitados),
 	path(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, [], CaminoIntermedio1),
@@ -226,37 +253,98 @@ findPaths(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoActual, Caminos
 	append(CaminoActual, [CaminoIntermedio1], CaminoIntermedio2),
     findPaths(Grid, [Nx,Ny],NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio2, CaminosFinales).
     
-/**Caso base, se termina cuando la próxima posición está fuera de la grilla.
-*/
+/* Caso base, se termina cuando la próxima posición está fuera de la grilla. */
 findPaths(_, [X,Y], NumOfColumns, NumOfRows, _, CaminoActual, CaminoActual):-
     \+nextPos([X,Y], NumOfColumns, NumOfRows, _).
 
-/**En caso
- * 
+/**
+ * Si la posición ya fue visitada, se avanza en la grilla.
 */
 findPaths(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoActual, CaminosFinales):-
     nextPos([X,Y], NumOfColumns, NumOfRows, [Nx,Ny]), member([X,Y], Visitados), 
     findPaths(Grid, [Nx,Ny], NumOfColumns, NumOfRows, Visitados, CaminoActual, CaminosFinales).
 
-
+/**
+ * Toma una posición y se encarga de agregarla a la lista de visitados y al camino. 
+ * Llama a multiPath/7 para recorrer a los adyacentes iguales de la posición.
+*/
 path(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal):-
     \+ member([X,Y], Visitados), \+ member([X,Y], CaminoInicial), append([[X,Y]], Visitados, NuevosVisitados),
     append([[X,Y]], CaminoInicial, CaminoIntermedio1),
     findAdy(Grid, [X,Y], NumOfColumns, NumOfRows, Adyacentes),
-    path_multi(Grid, Adyacentes, NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio1, CaminoFinal).
+    multiPath(Grid, Adyacentes, NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio1, CaminoFinal).
 
 path(_, [X,Y], _, _, Visitados, CaminoInicial, CaminoInicial):-
     (member([X,Y], Visitados); member([X,Y], CaminoInicial)).
 
+/**
+ * Recorre una lista de posiciones y por cada posición, llama a path/7 para que lo agregue al camino recorrido
+ * y evaluar sus adyacentes. 
+*/
+multiPath(_,[],_,_,_,Camino,Camino).
 
-path_multi(_,[],_,_,_,Camino,Camino).
-
-path_multi(Grid, [[X,Y]|T], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal):-
+multiPath(Grid, [[X,Y]|T], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal):-
     \+ member([X,Y], Visitados), \+ member([X,Y], CaminoInicial),
     path(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoIntermedio),
     append([[X,Y]], Visitados, NuevosVisitados),
-    path_multi(Grid, T, NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio, CaminoFinal).
+    multiPath(Grid, T, NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio, CaminoFinal).
 
-path_multi(Grid, [[X,Y]|T], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal):-
+multiPath(Grid, [[X,Y]|T], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal):-
     (member([X,Y], Visitados); member([X,Y], CaminoInicial)),
-	path_multi(Grid, T, NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal).
+	multiPath(Grid, T, NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal).
+
+maxSumPath(Grid, NumOfColumns, [Path|Paths], MaxParcial, MaxFinal):-
+    sumatoria(Grid, NumOfColumns, Path, Sum),
+    sumatoria(Grid, NumOfColumns, MaxParcial, Sum2),
+    length(Path, L),
+    ((Sum >= Sum2), L > 1), !, 
+    maxSumPath(Grid, NumOfColumns, Paths, Path, MaxFinal).
+
+maxSumPath(Grid, NumOfColumns, [_|Paths], MaxParcial, MaxFinal):-    
+    maxSumPath(Grid, NumOfColumns, Paths, MaxParcial, MaxFinal).
+
+maxSumPath(_, _, [], MaxParcial, MaxParcial).
+ 
+ 
+maxPath(Grid, NumOfColumns, MaxPath):-
+    numOfRows(Grid, NumOfColumns, NumOfRows),
+    findAllPaths(Grid, [0,0], NumOfColumns, NumOfRows, [], AllPaths),
+    maxSumPath(Grid, NumOfColumns, AllPaths, [], MaxPath).
+
+/*Chequea si la posición [X1,Y1] contiene el doble del valor de [X,Y]*/
+isDouble(Grid, NumOfColumns, [X,Y], [X1,Y1]):-
+    getValue(Grid, [X,Y], NumOfColumns, Val1), 
+    getValue(Grid, [X1,Y1], NumOfColumns, Val2),
+    2*Val1 =:= Val2.
+
+ /*Devuelve una posición conectable con [X,Y] que no haya sido conectada antes*/
+findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, [X1,Y1]):-
+    adyacente([X,Y], NumOfColumns, NumOfRows,[X1,Y1]),
+    (mismoValor(Grid, NumOfColumns, [X,Y], [X1,Y1]);
+    (\+ CaminoActual = [],
+    last(CaminoActual, Ultimo),
+     mismoValor(Grid,NumOfColumns, [X,Y], Ultimo),
+    isDouble(Grid,NumOfColumns, [X,Y],[X1,Y1]))),
+    \+ member([X1,Y1], CaminoActual). 
+
+/*Encuentra todos los posibles caminos de la grilla*/
+findAllPaths(_, [X,Y],NumOfColumns, NumOfRows, CaminosParciales, CaminosParciales):-
+	(\+ nextPos([X,Y], NumOfColumns, NumOfRows, _)).
+
+findAllPaths(Grid, [X,Y],NumOfColumns, NumOfRows, CaminosParciales, CaminosFinales):-
+    findall(Path, linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, [], Path), Paths),
+    nextPos([X,Y], NumOfColumns, NumOfRows, [Xn,Yn]),
+    findAllPaths(Grid, [Xn,Yn], NumOfColumns, NumOfRows, CaminosParciales, CaminosNuevos),
+    append(Paths, CaminosNuevos, CaminosFinales).
+
+/*Conecta una posición con otra recursivamente hasta formar un camino*/
+linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, CaminoFinal):-
+    append(CaminoActual, [[X,Y]], CaminoNuevo),
+    findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoNuevo, [X1,Y1]),
+    linealPath(Grid, [X1,Y1], NumOfColumns, NumOfRows, CaminoNuevo, CaminoFinal).
+
+/*Caso base, si no encuentra posiciones conectables devuelve el camino*/
+linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, CaminoFinal):-
+	\+ findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, _),
+    append(CaminoActual, [[X,Y]], CaminoFinal).
+

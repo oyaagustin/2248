@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PengineClient from './PengineClient';
 import Board from './Board';
-import { joinResult } from './util';
+import { joinResult, numberToColor } from './util';
 
 let pengine;
 
@@ -11,6 +11,7 @@ function Game() {
   const [grid, setGrid] = useState(null);
   const [numOfColumns, setNumOfColumns] = useState(null);
   const [score, setScore] = useState(0);
+  const [prediction, setPred] = useState(0);
   const [path, setPath] = useState([]);
   const [waiting, setWaiting] = useState(false);
 
@@ -42,23 +43,26 @@ function Game() {
       return;
     }
     setPath(newPath);
-    console.log(JSON.stringify(newPath));
     calcularPrediccion(newPath);
   }
 
   function calcularPrediccion(newPath) {
-    const gridS = JSON.stringify(grid);
-    const pathS = JSON.stringify(newPath);
-    const queryS = "prediccion(" + gridS + "," + numOfColumns + "," + pathS + ",Res)";
-    pengine.query(queryS, (success, response) => {
-      if (success) {
-        const res = response['Res'];
-        document.getElementById("prediccion").innerHTML=res;
-      } else {
-        setWaiting(false);
-      }
-    });
+    if(newPath.length > 1 ){
+      const gridS = JSON.stringify(grid);
+      const pathS = JSON.stringify(newPath);
+      const queryS = "prediccion(" + gridS + "," + numOfColumns + "," + pathS + ",Res)";
+      pengine.query(queryS, (success, response) => {
+        if (success) {
+          const res = response['Res'];
+          setPred(res);
+        }
+      });
+    }
+    else {
+      setPred(0);
+    }
   }
+
 
   /**
    * Called when the user finished drawing a path in the grid.
@@ -89,6 +93,7 @@ function Game() {
       if (success) {
         setScore(score + joinResult(path, grid, numOfColumns));
         setPath([]);
+        setPred(0);
         animateEffect(response['RGrids']);
       } else {
         setWaiting(false);
@@ -134,7 +139,15 @@ function Game() {
   return (
     <div className="game">
       <div className="header">
-        <div className="score">{score}</div>
+        <div className="scoreboard">
+          <span className="score-label">Score: </span>
+          <span className="score-value">{score} </span>
+        </div>
+        <div className="acumulado"
+        style={prediction === 0? null: {backgroundColor: numberToColor(prediction)}}> 
+          <span className="acumulado-label">Acumulado: </span>
+          <span className="acumulado-value">{prediction}</span>
+        </div>
       </div>
       <Board
         grid={grid}
@@ -145,10 +158,7 @@ function Game() {
       />
       <div className="herramientas">
         <div className="booster" onClick={onClickBooster}>
-          booster colapsar
-        </div>
-        <div id="prediccion" className="booster" > 
-          0
+          Booster colapsar
         </div>
       </div>
     </div>
