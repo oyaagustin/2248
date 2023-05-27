@@ -21,46 +21,29 @@ body {
   width: 100%;
 }
 
-.scoreboard {
-  background-color: #87ceeb; 
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: flex;
-  font-size: 25px;
-  border-radius: 10px;
-  margin: 10px;
-}
-
-.score-label{
+.score{
   font-weight: bold;
-  margin-right: 5px;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 25px;
+  margin: 5px;
 }
 
-.score-value{
-  font-weight: normal;
-}
-
-.acumulado{
+.preview{
   background-color: #808080; 
   color: white;
-  padding: 15px 32px;
+  padding: 15px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-size: 25px;
+  display: none;
   border-radius: 10px;
-  margin: 10px;
+  margin: 5px;
 }
 
-.acumulado-label{
+.preview-value{
+  font-size: 25px;
   font-weight: bold;
-  margin-right: 5px;
-}
-
-.acumulado-value{
-  font-weight: normal;
 }
 
 .board {
@@ -91,7 +74,7 @@ body {
   margin-left: 20px;
 }
 
-.booster {
+.powerUp{
   background-color: #4CAF50; /* Green */
   color: white;
   font-weight: bold;
@@ -104,6 +87,7 @@ body {
   margin: 10px;
   cursor: pointer;
 }
+
 
 .rise {
   margin: 2px;

@@ -249,9 +249,16 @@ numOfRows(Grid, NumOfColumns, Rows):-
 findPaths(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoActual, CaminosFinales):-
     nextPos([X,Y], NumOfColumns, NumOfRows, [Nx,Ny]), \+ member([X,Y], Visitados),
 	path(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, [], CaminoIntermedio1),
-    append(Visitados, CaminoIntermedio1, NuevosVisitados), 
+    length(CaminoIntermedio1,L), L > 1,!,
+    append(Visitados, CaminoIntermedio1, NuevosVisitados),
 	append(CaminoActual, [CaminoIntermedio1], CaminoIntermedio2),
     findPaths(Grid, [Nx,Ny],NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio2, CaminosFinales).
+    
+findPaths(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoActual, CaminosFinales):-
+    nextPos([X,Y], NumOfColumns, NumOfRows, [Nx,Ny]), \+ member([X,Y], Visitados),
+	append(Visitados, [[X,Y]], NuevosVisitados),
+    findPaths(Grid, [Nx,Ny],NumOfColumns, NumOfRows, NuevosVisitados, CaminoActual, CaminosFinales).
+
     
 /* Caso base, se termina cuando la próxima posición está fuera de la grilla. */
 findPaths(_, [X,Y], NumOfColumns, NumOfRows, _, CaminoActual, CaminoActual):-

@@ -11,7 +11,7 @@ function Game() {
   const [grid, setGrid] = useState(null);
   const [numOfColumns, setNumOfColumns] = useState(null);
   const [score, setScore] = useState(0);
-  const [prediction, setPred] = useState(0);
+  const [preview, setPrev] = useState(0);
   const [path, setPath] = useState([]);
   const [waiting, setWaiting] = useState(false);
 
@@ -54,12 +54,12 @@ function Game() {
       pengine.query(queryS, (success, response) => {
         if (success) {
           const res = response['Res'];
-          setPred(res);
+          setPrev(res);
         }
       });
     }
     else {
-      setPred(0);
+      setPrev(0);
     }
   }
 
@@ -93,7 +93,7 @@ function Game() {
       if (success) {
         setScore(score + joinResult(path, grid, numOfColumns));
         setPath([]);
-        setPred(0);
+        setPrev(0);
         animateEffect(response['RGrids']);
       } else {
         setWaiting(false);
@@ -118,13 +118,13 @@ function Game() {
   }
 
   function onClickBooster() {     
-    if(!waiting){
+    if(!waiting && path.length === 0){
       const gridS = JSON.stringify(grid);
       const queryS = "boosterColapser(" + gridS + "," + numOfColumns + ", RGrids)";    
       pengine.query(queryS, (success, response) => {        
       if (success) {                    
         setWaiting(true);
-        animateEffect(response['RGrids'], 400);              
+        animateEffect(response['RGrids']);              
       } else {
         setWaiting(false);
       }        
@@ -139,14 +139,13 @@ function Game() {
   return (
     <div className="game">
       <div className="header">
-        <div className="scoreboard">
-          <span className="score-label">Score: </span>
-          <span className="score-value">{score} </span>
+        <div className="score"
+        style={preview === 0? {display: "block"} : {display: "none"}}>
+          {score}
         </div>
-        <div className="acumulado"
-        style={prediction === 0? null: {backgroundColor: numberToColor(prediction)}}> 
-          <span className="acumulado-label">Acumulado: </span>
-          <span className="acumulado-value">{prediction}</span>
+        <div className="preview"
+        style={preview === 0? null: {backgroundColor: numberToColor(preview), display: "block"}}>
+          <span className="preview-value">{preview}</span>
         </div>
       </div>
       <Board
@@ -157,8 +156,13 @@ function Game() {
         onDone={onPathDone}
       />
       <div className="herramientas">
-        <div className="booster" onClick={onClickBooster}>
-          Booster colapsar
+        <div className="powerUp" 
+        onClick={onClickBooster}
+        style={(preview === 0 || waiting)? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
+        Booster colapsar
+        </div>
+        <div className="powerUp" style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
+          Mejor camino
         </div>
       </div>
     </div>
