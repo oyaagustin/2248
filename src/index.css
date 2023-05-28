@@ -86,8 +86,19 @@ body {
   border-radius: 10px;
   margin: 10px;
   cursor: pointer;
+  transition: .2s;
 }
 
+.powerUp:hover {
+  background-color: #8BC34A;
+  padding: 20px 35px;
+}
+
+.powerUp:active {
+  background-color: white;
+  padding: 10px 30px;
+  color: #8BC34A;
+}
 
 .rise {
   margin: 2px;

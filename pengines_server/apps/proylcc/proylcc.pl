@@ -184,6 +184,7 @@ get_filas(List, Result) :-
     sort(XValues, SortedXValues),
     get_filas_aux(SortedXValues, List, Result).
 
+
 get_filas_aux([], _, []).
 get_filas_aux([X|XValues], List, [Sublist|Result]) :-
     findall([X,Y], member([X,Y], List), Sublist),
