@@ -2,7 +2,7 @@
 	[  
 		join/4,
         prediccion/4,
-        boosterColapser/3
+        boosterCollapser/3
 	]).
 
 /**
@@ -29,7 +29,7 @@ prediccion(Grid, NumOfColumns, Path, Res) :-
  * del grupo.
 */
 
-boosterColapser(Grid, NumOfColumns, RGrids):-
+boosterCollapser(Grid, NumOfColumns, RGrids):-
     numOfRows(Grid, NumOfColumns, NumOfRows),
     findPaths(Grid, [0,0], NumOfColumns, NumOfRows, [], [], CaminosFinales),
     subListSort(CaminosFinales, CaminosOrdenados),

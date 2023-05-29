@@ -39,6 +39,7 @@ body {
   display: none;
   border-radius: 10px;
   margin: 5px;
+  transition: .7s;
 }
 
 .preview-value{
@@ -67,6 +68,7 @@ body {
   color: white;
   font-family: Arial, Helvetica, sans-serif;
   cursor: pointer;
+  transition: .1s;
 }
 
 .herramientas > div{
@@ -138,6 +140,7 @@ body {
 .connectorLine {
   flex-grow: 1;
   height: 8px;
+  transition: .1s;
 }
 
 .connectorLine.vertical {

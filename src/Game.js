@@ -11,7 +11,7 @@ function Game() {
   const [grid, setGrid] = useState(null);
   const [numOfColumns, setNumOfColumns] = useState(null);
   const [score, setScore] = useState(0);
-  const [preview, setPrev] = useState(0);
+  const [preview, setPreview] = useState(0);
   const [path, setPath] = useState([]);
   const [waiting, setWaiting] = useState(false);
 
@@ -46,6 +46,9 @@ function Game() {
     calcularPrediccion(newPath);
   }
 
+  /**
+   * Computes and set the preview block
+   */
   function calcularPrediccion(newPath) {
     if(newPath.length > 1 ){
       const gridS = JSON.stringify(grid);
@@ -54,12 +57,12 @@ function Game() {
       pengine.query(queryS, (success, response) => {
         if (success) {
           const res = response['Res'];
-          setPrev(res);
+          setPreview(res);
         }
       });
     }
     else {
-      setPrev(0);
+      setPreview(0);
     }
   }
 
@@ -68,23 +71,6 @@ function Game() {
    * Called when the user finished drawing a path in the grid.
    */
   function onPathDone() {
-    /*
-    Build Prolog query, which will be like:
-    join([
-          64,4,64,32,16,
-          64,8,16,2,32,
-          2,4,64,64,2,
-          2,4,32,16,4,
-          16,4,16,16,16,
-          16,64,2,32,32,
-          64,2,64,32,64,
-          32,2,64,32,4
-          ], 
-          5, 
-          [[2, 0], [3, 0], [4, 1], [3, 1], [2, 1], [1, 1], [1, 2], [0, 3]],
-          RGrids
-        ).
-    */
     const gridS = JSON.stringify(grid);
     const pathS = JSON.stringify(path);
     const queryS = "join(" + gridS + "," + numOfColumns + "," + pathS + ", RGrids)";
@@ -93,7 +79,7 @@ function Game() {
       if (success) {
         setScore(score + joinResult(path, grid, numOfColumns));
         setPath([]);
-        setPrev(0);
+        setPreview(0);
         animateEffect(response['RGrids']);
       } else {
         setWaiting(false);
@@ -120,7 +106,7 @@ function Game() {
   function onClickBooster() {     
     if(!waiting && path.length === 0){
       const gridS = JSON.stringify(grid);
-      const queryS = "boosterColapser(" + gridS + "," + numOfColumns + ", RGrids)";    
+      const queryS = "boosterCollapser(" + gridS + "," + numOfColumns + ", RGrids)";    
       pengine.query(queryS, (success, response) => {        
       if (success) {                    
         setWaiting(true);
