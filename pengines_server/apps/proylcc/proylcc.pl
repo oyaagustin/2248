@@ -11,16 +11,18 @@
  */
 join(Grid, NumOfColumns, Path, RGrids) :-
     sumatoria(Grid, NumOfColumns, Path, Sum),
-    pot_2(Sum, Val),
+    pot2(Sum, Val),
     pathDLT(Grid, NumOfColumns, Path, Val, NewGrid),
-    eliminar_ultimo(Path, PathDLT),
-    get_filas(PathDLT, Filas),
+    eliminarUltimo(Path, PathDLT),
+    getFilas(PathDLT, Filas),
     gravedad(NewGrid,Filas,NumOfColumns, RGrids).
 
-/*Devuelve el resultado preliminar.*/
+/**
+ * Devuelve el resultado preliminar.
+*/
 prediccion(Grid, NumOfColumns, Path, Res) :- 
     sumatoria(Grid, NumOfColumns, Path, Sum),
-    pot_2(Sum, Res).
+    pot2(Sum, Res).
     
 /**
  * Power up. Colapsa todos los grupos de bloques adyacentes
@@ -39,7 +41,7 @@ boosterCollapser(Grid, NumOfColumns, RGrids):-
 	eliminarTodosUltimo(CaminosOrdenados, ListaPosicionesVacias),
 	concatenar(ListaPosicionesVacias, PosicionesVacias),
     pathDLT(GrillaIntermedia, NumOfColumns, PosicionesVacias, 0, GrillaIntermedia2),
-    get_filas(PosicionesVacias, Filas),
+    getFilas(PosicionesVacias, Filas),
     gravedad(GrillaIntermedia2,Filas,NumOfColumns, RGrids).
     
 
@@ -68,16 +70,16 @@ concatenar([L|Ls], Res) :-
 */
 eliminarTodosUltimo([], []).
 eliminarTodosUltimo([L1|Ls1], [L2|Ls2]) :-
-    eliminar_ultimo(L1, L2),
+    eliminarUltimo(L1, L2),
     eliminarTodosUltimo(Ls1, Ls2).
 
 /**
  * Elimina el último elemento de una lista.
 */
-eliminar_ultimo([], []).
-eliminar_ultimo([_], []).
-eliminar_ultimo([X|Xs], [X|Ys]) :-
-    eliminar_ultimo(Xs, Ys).
+eliminarUltimo([], []).
+eliminarUltimo([_], []).
+eliminarUltimo([X|Xs], [X|Ys]) :-
+    eliminarUltimo(Xs, Ys).
 
 /**
  * Devuelve el último elemento de una lista.
@@ -94,33 +96,35 @@ getUltimo([H|T], [X|Rest]) :-
 getListaSumatoria(_, _, [], []).
 getListaSumatoria(Grid, NumOfColumns, [L|Ls], [Sum|Sums]) :-
     sumatoria(Grid, NumOfColumns, L, TSum),
-    pot_2(TSum, Sum),
+    pot2(TSum, Sum),
     getListaSumatoria(Grid, NumOfColumns, Ls, Sums).
 
-/*Para cada sublista dentro de una lista, elimina la última posición*/
-eliminarUltimo([], []).
-eliminarUltimo([L|Sl], [NL|NSubList]):-
-    append(NL,[_], L),
-    eliminarUltimo([Sl], NSubList).
     
-/*Ordena cada sublista dentro de una lista de sublistas*/
+/**
+ * Ordena cada sublista dentro de una lista de sublistas
+*/
 subListSort([], []).
 subListSort([L|S], [SL|SortLists]) :-
     sort(L, SL),
     subListSort(S, SortLists).
     
 
-/*Calcula 2 a la N potencia*/
- pot_2(N, R) :- R is 2**ceil(log(N)/log(2)).
+/**
+ *Calcula la menor potencia de 2, mayor o igual al número N
+*/
+ pot2(N, R) :- R is 2**ceil(log(N)/log(2)).
 
-/*Devuelve una potencia de 2 aleatoria usando como techo el máximo elemento de la grilla*/
-random_pot(Grid, R) :-  
+/**
+ *Devuelve una potencia de 2 aleatoria usando como techo el máximo elemento de la grilla
+*/
+randomPot(Grid, R) :-  
 	max_list(Grid, Max),
 	N is floor(log(Max)/log(2))-1,
 	random_between(1, N, Exp),
 	R is 2**Exp.
 
-/**Devuelve el valor de la posición en la grilla
+/**
+ * Devuelve el valor de la posición en la grilla
 */
  getValue(Grid, [X,Y], NumOfColumns, Val):- Celda is X*NumOfColumns+Y, nth0(Celda, Grid, Val).
 
@@ -131,7 +135,9 @@ random_pot(Grid, R) :-
     nth0(Index, Grid, _, TempGrid),
     nth0(Index, NewGrid, Value, TempGrid).
 
-/*Devuelve la sumatoria de los valores de las posiciones en la grilla*/
+/**
+ * Devuelve la sumatoria de los valores de las posiciones en la grilla
+*/
  sumatoria(_, _, [], 0).
  sumatoria(Grid, NumOfColumns, [[X,Y]|T], Res) :- 
    sumatoria(Grid, NumOfColumns, T, ResAux),
@@ -179,28 +185,28 @@ subir(Grid,[X,Y], NumOfColumns, Valor, NewGrid) :-
  * Se encarga de separar la lista en una lista de 
  * sublistas que representan las filas :)
 */
-get_filas(List, Result) :-
+getFilas(List, Result) :-
     findall(X, member([X,_], List), XValues),
     sort(XValues, SortedXValues),
-    get_filas_aux(SortedXValues, List, Result).
+    getFilasAux(SortedXValues, List, Result).
 
 
-get_filas_aux([], _, []).
-get_filas_aux([X|XValues], List, [Sublist|Result]) :-
+getFilasAux([], _, []).
+getFilasAux([X|XValues], List, [Sublist|Result]) :-
     findall([X,Y], member([X,Y], List), Sublist),
-    get_filas_aux(XValues, List, Result).
+    getFilasAux(XValues, List, Result).
 
 
 /**
  * Sube cada elemento de la lista y setea una potencia de 
  * 2 aleatoria.
 */
-subir_fila(Grid,[],_,Grid).
+subirFila(Grid,[],_,Grid).
 
-subir_fila(Grid, [[X,Y]|T], NumOfColumns, NewGrid):-
-    random_pot(Grid, Val),
+subirFila(Grid, [[X,Y]|T], NumOfColumns, NewGrid):-
+    randomPot(Grid, Val),
     subir(Grid, [X,Y], NumOfColumns, Val, TempGrid),
-    subir_fila(TempGrid, T, NumOfColumns, NewGrid).
+    subirFila(TempGrid, T, NumOfColumns, NewGrid).
     
 /**
  * Dada una lista de filas, se encarga de aplicar efecto 
@@ -208,45 +214,59 @@ subir_fila(Grid, [[X,Y]|T], NumOfColumns, NewGrid):-
 */
 gravedad(Grid, [], _, [Grid]).
 gravedad(Grid, [Fila|Filas], NumOfColumns, [Grid|RGrids]) :-
-    subir_fila(Grid, Fila, NumOfColumns, TGrid),
+    subirFila(Grid, Fila, NumOfColumns, TGrid),
     gravedad(TGrid, Filas, NumOfColumns, RGrids).
 
 
-/* Predicado para verificar si dos celdas tienen el mismo valor*/
+/** 
+ * Predicado para verificar si dos celdas tienen el mismo valor
+*/
 mismoValor(Grid, NumOfColumns, [X1,Y1], [X2,Y2]) :-
     Pos1 is floor(X1 * NumOfColumns + Y1),
     Pos2 is floor(X2 * NumOfColumns + Y2),
     nth0(Pos1, Grid, Value),
     nth0(Pos2, Grid, Value).
 
-/* Comprueba si dos números son adyacentes, o devuelve un número adyacente*/
+/**
+ * Comprueba si dos números son adyacentes, o devuelve un número adyacente
+*/
 adyacente([X,Y], NumOfColumns, NumOfRows, [X2,Y2]):-
     between(-1,1, V1), X2 is X+V1,
     between(-1,1, V2), Y2 is Y+V2,
      (\+ ([X2,Y2] = [X,Y])),
     validatePos([X2,Y2], NumOfColumns, NumOfRows).
 
-/* Comprueba que una posición esté dentro del arreglo*/
+/** 
+ * Comprueba que una posición esté dentro del arreglo
+*/
 validatePos([X2,Y2], NumOfColumns, NumOfRows) :-
     X2 >= 0, Y2 >= 0, 
     X2 < NumOfRows, Y2 < NumOfColumns.
 
-/* Devuelve todos los adyacentes iguales al elemento de la posición dada*/
+/** 
+ * Devuelve todos los adyacentes iguales al elemento de la posición dada
+*/
 findAdy(Grid, [X,Y], NumOfColumns, NumOfRows, Adyacentes):-
     findall([Xa,Ya],(adyacente([X,Y], NumOfColumns, NumOfRows, [Xa,Ya]), 
                     mismoValor(Grid, NumOfColumns, [X,Y], [Xa,Ya])),Adyacentes).
 
-/* Calcula la siguiente posición, devuelve falso si se está en una posición inválida o final*/
+/** 
+ * Calcula la siguiente posición, devuelve falso si se está en una posición inválida o final
+*/
 nextPos([X,Y], NumOfColumns, NumOfRows, [NX,NY]) :-
     NX is (X + ((Y+1) // NumOfColumns)),
     NY is (Y+1) mod NumOfColumns,
     validatePos([NX,NY], NumOfColumns, NumOfRows).
 
-/* Calcula el número de filas de la grilla*/
+/** 
+ * Calcula el número de filas de la grilla
+*/
 numOfRows(Grid, NumOfColumns, Rows):-
     length(Grid, L), Rows is ceiling(L/NumOfColumns).
 
-/* Encuentra todos los caminos posibles de la grilla*/
+/** 
+ * Encuentra todos los caminos posibles de la grilla
+*/
 findPaths(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoActual, CaminosFinales):-
     nextPos([X,Y], NumOfColumns, NumOfRows, [Nx,Ny]), \+ member([X,Y], Visitados),
 	path(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, [], CaminoIntermedio1),
@@ -261,7 +281,9 @@ findPaths(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoActual, Caminos
     findPaths(Grid, [Nx,Ny],NumOfColumns, NumOfRows, NuevosVisitados, CaminoActual, CaminosFinales).
 
     
-/* Caso base, se termina cuando la próxima posición está fuera de la grilla. */
+/** 
+ * Caso base, se termina cuando la próxima posición está fuera de la grilla. 
+*/
 findPaths(_, [X,Y], NumOfColumns, NumOfRows, _, CaminoActual, CaminoActual):-
     \+nextPos([X,Y], NumOfColumns, NumOfRows, _).
 
@@ -282,6 +304,9 @@ path(Grid, [X,Y], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal
     findAdy(Grid, [X,Y], NumOfColumns, NumOfRows, Adyacentes),
     multiPath(Grid, Adyacentes, NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio1, CaminoFinal).
 
+/**
+ * Si mi posición ya fue visitada entonces dejo de recorrer el camino. 
+*/
 path(_, [X,Y], _, _, Visitados, CaminoInicial, CaminoInicial):-
     (member([X,Y], Visitados); member([X,Y], CaminoInicial)).
 
@@ -297,9 +322,18 @@ multiPath(Grid, [[X,Y]|T], NumOfColumns, NumOfRows, Visitados, CaminoInicial, Ca
     append([[X,Y]], Visitados, NuevosVisitados),
     multiPath(Grid, T, NumOfColumns, NumOfRows, NuevosVisitados, CaminoIntermedio, CaminoFinal).
 
+/**
+ * Si la posición ya fue visitada entonces se avanza en la lista 
+ * y se llama recursivamente con la siguiente posición.
+*/
 multiPath(Grid, [[X,Y]|T], NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal):-
     (member([X,Y], Visitados); member([X,Y], CaminoInicial)),
 	multiPath(Grid, T, NumOfColumns, NumOfRows, Visitados, CaminoInicial, CaminoFinal).
+
+
+/************************************************************************************************************/
+/****************************A partir de acá el código corresponde al proyecto 2****************************/
+/**********************************************************************************************************/
 
 maxSumPath(Grid, NumOfColumns, [Path|Paths], MaxParcial, MaxFinal):-
     sumatoria(Grid, NumOfColumns, Path, Sum),
