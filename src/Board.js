@@ -41,6 +41,15 @@ function Board({ grid, numOfColumns, path, onPathChange, onDone }) {
         // eslint-disable-next-line
     }, []);
 
+    useEffect(() => {
+        window.addEventListener("keydown", e => {
+            if (e.key === " ") {
+                onDone();
+            }
+        });
+
+    }, []);
+
     const numOfRows = grid.length / numOfColumns;
     return (
         <div className="board">

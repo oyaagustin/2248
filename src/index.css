@@ -103,7 +103,9 @@ body {
 }
 
 .rise {
-  margin: 2px;
+  margin: 0px;
+  padding: 25px;
+  filter:brightness(105%);
 }
 
 .riseOnHover:hover {

@@ -20,6 +20,7 @@ function Game() {
     PengineClient.init(onServerReady);
   }, []);
 
+
   /**
    * Called when the server was successfully initialized
    */
@@ -47,7 +48,6 @@ function Game() {
   }
 
   /**
-   * Computes and set the preview block
    */
   function calcularPrediccion(newPath) {
     if(newPath.length > 1 ){
@@ -119,6 +119,19 @@ function Game() {
     }
   }
 
+  function onClickBestPath(){
+    if(!waiting && path.length === 0){
+      const gridS = JSON.stringify(grid);
+      const queryS = "maxPath("+gridS+","+numOfColumns+", MaxPath)";
+      pengine.query(queryS, (success, response) =>{
+        if(success){
+          setPath(response['MaxPath']);
+          calcularPrediccion(response['MaxPath']);
+      }
+  });
+  }
+}
+
   if (grid === null) {
     return null;
   }
@@ -147,7 +160,9 @@ function Game() {
         style={(preview === 0 || waiting)? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
         Booster colapsar
         </div>
-        <div className="powerUp" style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
+        <div className="powerUp" 
+        onClick={onClickBestPath}
+        style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
           Mejor camino
         </div>
       </div>
