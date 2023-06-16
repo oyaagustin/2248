@@ -417,21 +417,20 @@ linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Sum, [Sum2|Camino
     findAllPossiblePaths(_, [X,Y],NumOfColumns, NumOfRows, CaminosParciales, CaminosParciales):-
         (\+ nextPos([X,Y], NumOfColumns, NumOfRows, _)).
     
-    findAllPossiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminosParciales, CaminosFinales):-
-        findall(Paths, posPath(Grid, [X,Y], NumOfColumns, NumOfRows, [], [], 0, Paths), CaminosParciales1),
-        concatenar(CaminosParciales1, CaminosConcatenados),
-        nextPos([X,Y], NumOfColumns, NumOfRows, [Xn,Yn]),
-        findAllPossiblePaths(Grid, [Xn,Yn], NumOfColumns, NumOfRows, CaminosParciales, CaminosNuevos),
-        append(CaminosConcatenados, CaminosNuevos, CaminosFinales).
-    
-    
+        findAllPossiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminosParciales, CaminosFinales):-
+            findall(Paths, posPath(Grid, [X,Y], NumOfColumns, NumOfRows, Paths), CaminosParciales1),
+            concatenar(CaminosParciales1, CaminosConcatenados),
+            nextPos([X,Y], NumOfColumns, NumOfRows, [Xn,Yn]),
+            findAllPossiblePaths(Grid, [Xn,Yn], NumOfColumns, NumOfRows, CaminosParciales, CaminosNuevos),
+            append(CaminosConcatenados, CaminosNuevos, CaminosFinales).
+        
+        
     /*Primer caso, necesito una posición adyacente igual a la actual*/
-    posPath(Grid, [X,Y], NumOfColumns, NumOfRows, [], Caminos, Sum, CaminoFinal):-
+    posPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminosFinales):-
+        findIgual(Grid, [X,Y], NumOfColumns, NumOfRows, [X1,Y1]), 
         getValue(Grid, [X,Y], NumOfColumns, Val),
-        Sum2 is (Sum + Val),
-        findIgual(Grid, [X,Y], NumOfColumns, NumOfRows, [X1,Y1]),
-        posPath(Grid, [X1,Y1], NumOfColumns, NumOfRows, [[X,Y]], Caminos, Sum2, CaminoFinal).
-    
+        posPath(Grid, [X1,Y1], NumOfColumns, NumOfRows, [[X,Y]], [], Val, CaminosFinales).
+        
     
     /* Caso base, si no encuentra posiciones conectables devuelve el camino */
     posPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Caminos, Sum, CaminoFinal) :-

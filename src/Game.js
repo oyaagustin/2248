@@ -14,6 +14,7 @@ function Game() {
   const [preview, setPreview] = useState(0);
   const [path, setPath] = useState([]);
   const [waiting, setWaiting] = useState(false);
+  const [thinking, setThinking] = useState(false);
 
   useEffect(() => {
     // This is executed just once, after the first render.
@@ -40,15 +41,14 @@ function Game() {
    */
   function onPathChange(newPath) {
     // No effect if waiting.
-    if (waiting) {
+    if (waiting || thinking) {
       return;
     }
     setPath(newPath);
     calcularPrediccion(newPath);
   }
 
-  /**
-   */
+ 
   function calcularPrediccion(newPath) {
     if(newPath.length > 1 ){
       const gridS = JSON.stringify(grid);
@@ -121,26 +121,32 @@ function Game() {
 
   function onClickBestPath(){
     if(!waiting && path.length === 0){
+      setThinking(true);
       const gridS = JSON.stringify(grid);
       const queryS = "maxPath("+gridS+","+numOfColumns+", MaxPath)";
       pengine.query(queryS, (success, response) =>{
         if(success){
+          setThinking(false);
           setPath(response['MaxPath']);
           calcularPrediccion(response['MaxPath']);
       }
+      setThinking(false);
   });
   }
 }
 
 function onClickBestAdy(){
   if(!waiting && path.length === 0){
+    setThinking(true);
     const gridS = JSON.stringify(grid);
     const queryS = "findMaxAdy("+gridS+","+numOfColumns+", AdyPath)";
     pengine.query(queryS, (success, response) =>{
       if(success){
+        setThinking(false);
         setPath(response['AdyPath']);
         calcularPrediccion(response['AdyPath']);
     }
+    setThinking(false);
 });
 }
 }
@@ -171,18 +177,22 @@ function onClickBestAdy(){
       <div className="herramientas">
         <div className="powerUp" 
         onClick={onClickBooster}
-        style={(preview === 0 || waiting)? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
+        style={(preview === 0 || waiting)? (thinking? {display:"none"}: null): {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
         Booster colapsar
         </div>
         <div className="powerUp" 
         onClick={onClickBestPath}
-        style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
+        style={preview === 0? (thinking? {display:"none"}: null): {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
           Mejor camino
         </div>
         <div className="powerUp" 
         onClick={onClickBestAdy}
-        style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
+        style={preview === 0? (thinking? {display: "none"}: null) : {backgroundColor: "#8B0000", cursor:"not-allowed"} }>
           Camino Mejor Adyacente
+        </div>
+        <div className="thinking"
+          style = {thinking? null: {display: "none"}}>
+          Pensando...
         </div>
       </div>
     </div>

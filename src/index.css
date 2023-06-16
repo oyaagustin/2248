@@ -76,6 +76,21 @@ body {
   margin-left: 20px;
 }
 
+.thinking{
+  background-color: #00BFFF;
+  color: white;
+  font-weight: bold;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 25px;
+  border-radius: 10px;
+  margin: 10px;
+  cursor: progress;
+  transition: .2s;
+}
+
 .powerUp{
   background-color: #4CAF50; /* Green */
   color: white;
