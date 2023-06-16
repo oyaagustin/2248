@@ -402,3 +402,120 @@ linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Sum, [Sum2|Camino
     getValue(Grid, [X,Y], NumOfColumns, Val),
     Sum2 is (Sum + Val),
     append(CaminoActual, [[X,Y]], CaminoParcial).
+
+
+
+
+
+    findMaxAdy(Grid, NumOfColumns, BestPath):- 
+        numOfRows(Grid, NumOfColumns, Rows),
+        findAllPossiblePaths(Grid, [0,0], NumOfColumns, Rows, [], Paths),
+        findAllElements(Grid, Elements),
+        checkForPath(Grid, NumOfColumns, Rows,Paths, Elements, BestPath).
+    
+    
+    /*Encuentra todos los posibles caminos de la grilla*/
+    findAllPossiblePaths(_, [X,Y],NumOfColumns, NumOfRows, CaminosParciales, CaminosParciales):-
+        (\+ nextPos([X,Y], NumOfColumns, NumOfRows, _)).
+    
+    findAllPossiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminosParciales, CaminosFinales):-
+        findall(Paths, possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, [], [], 0, Paths), CaminosParciales1),
+        nextPos([X,Y], NumOfColumns, NumOfRows, [Xn,Yn]),
+        findAllPossiblePaths(Grid, [Xn,Yn], NumOfColumns, NumOfRows, CaminosParciales, CaminosNuevos),
+        append(CaminosParciales1, CaminosNuevos, CaminosFinales).
+    
+    
+    /*Primer caso, necesito una posición adyacente igual a la actual*/
+    possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, [], [], Sum, CaminosFinales):-
+        getValue(Grid, [X,Y], NumOfColumns, Val),
+        Sum2 is (Sum + Val),
+        findIgual(Grid, [X,Y], NumOfColumns, NumOfRows, [X1,Y1]),
+        possiblePaths(Grid, [X1,Y1], NumOfColumns, NumOfRows, [[X,Y]], [], Sum2, CaminosFinales).
+    
+    /*Encuentra recursivamente un camino guardando los subcaminos en el proceso*/
+    possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, CaminosActuales, Sum, CaminosFinales):-
+        append(CaminoActual, [[X,Y]], CaminoNuevo),
+        length(CaminoNuevo, L), L>1,
+        getValue(Grid, [X,Y], NumOfColumns, Val),
+        Sum2 is (Sum + Val),
+        append([[Sum2|CaminoNuevo]], CaminosActuales, CaminosNuevos),
+        findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoNuevo, [X1,Y1]),
+        possiblePaths(Grid, [X1,Y1], NumOfColumns, NumOfRows, CaminoNuevo, CaminosNuevos, Sum2, CaminosFinales).
+    
+    /*Caso base, si no encuentra posiciones conectables devuelve el camino*/
+    possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, CaminosActuales, Sum, CaminosFinales):-
+        (\+ findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, _)),
+        length(CaminoActual, L), L > 1,
+        getValue(Grid, [X,Y], NumOfColumns, Val),
+        Sum2 is (Sum + Val),
+        append(CaminoActual, [[X,Y]], CaminoParcial),
+        append([[Sum2|CaminoParcial]], CaminosActuales, CaminosFinales).
+    
+    possiblePaths(_,_,_,_,[], CaminosActuales,_,CaminosActuales).
+    
+    checkForPath(_,_,_,_,[],[]).
+    
+    checkForPath(Grid, NumOfColumns, NumOfRows, Paths, [Elem|_], BestPath):-
+        findPositions(Grid, NumOfColumns, Elem, Positions),
+        checkForPath2(Grid, NumOfColumns, NumOfRows, Paths, Elem, Positions, BestPath).
+    
+    checkForPath(Grid, NumOfColumns, NumOfRows, Paths, [_|Elements], BestPath):-
+        checkForPath(Grid, NumOfColumns, NumOfRows, Paths, Elements, BestPath).
+    
+    checkForPath2(_,_,_,_,_,[],[]).
+    
+    checkForPath2(Grid, NumOfColumns, NumOfRows, Paths, Elem, [Pos|_], BestPath):-
+        maxAdyCheck(Grid, NumOfColumns, NumOfRows, Paths, Elem, Pos, BestPath).
+    
+    checkForPath2(Grid, NumOfColumns, NumOfRows, Paths, Elem, [_|Positions], BestPath):-
+        checkForPath2(Grid, NumOfColumns, NumOfRows, Paths, Elem, Positions, BestPath).
+    
+    
+    maxAdyCheck(Grid, NumOfColumns, NumOfRows, [[H|T]|_], Elem, Pos, T):-
+        pot2(H, Pot), Pot =:= Elem,
+        join(Grid, NumOfColumns, T, RGrids),
+        last(RGrids, Grid2), getValue(Grid2, Pos, NumOfColumns, Val),
+        Val =:= Elem,
+        findIgual(Grid2, Pos, NumOfColumns, NumOfRows, _).
+    
+    maxAdyCheck(Grid, NumOfColumns, NumOfRows, [_|Paths], Elem, Pos, FinalPath):-
+        maxAdyCheck(Grid, NumOfColumns, NumOfRows, Paths, Elem, Pos, FinalPath).
+    
+    
+    findAllElements(List, Elements):-
+        findAllElementsAux(List, [], TElements1),
+        sort(TElements1, TElements2),
+        reverse(TElements2, Elements).
+    
+    findAllElementsAux([],Elems,Elems).
+    
+    findAllElementsAux([H|T], Elems, ElemFinales):-
+        (\+member(H, Elems)),
+        append([H], Elems, ElemParciales),
+        findAllElementsAux(T, ElemParciales, ElemFinales).
+    
+    findAllElementsAux([_|T], Elems, ElemFinales):-
+        findAllElementsAux(T, Elems, ElemFinales).
+    
+    indexToPos(Index, NumOfColumns, [X,Y]):-
+        X is Index div NumOfColumns,
+        Y is Index mod NumOfColumns.
+    
+    findPositions(Grid, NumOfColumns, Elem, Positions):-
+        findPositionsAux(Grid, NumOfColumns, 0, Elem, [], Positions).
+    
+    findPositionsAux([], _, _, _, Positions, Positions).
+    
+    findPositionsAux([H|T], NumOfColumns, Index, Elem, Positions, FinalPositions):-
+        H=:=Elem, !, indexToPos(Index, NumOfColumns, Pos),
+        append([Pos], Positions, TPositions),
+        NIndex is Index+1,
+        findPositionsAux(T, NumOfColumns, NIndex, Elem, TPositions, FinalPositions).
+       
+    findPositionsAux([_|T], NumOfColumns, Index, Elem, Positions, FinalPositions):-
+        NIndex is Index+1, 
+        findPositionsAux(T, NumOfColumns, NIndex, Elem, Positions, FinalPositions).
+    
+    
+    
+    
