@@ -2,7 +2,9 @@
 	[  
 		join/4,
         prediccion/4,
-        boosterCollapser/3
+        boosterCollapser/3,
+        maxPath/3,
+        findMaxAdy/3
 	]).
 
 /**
@@ -403,15 +405,12 @@ linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Sum, [Sum2|Camino
     Sum2 is (Sum + Val),
     append(CaminoActual, [[X,Y]], CaminoParcial).
 
-
-
-
-
     findMaxAdy(Grid, NumOfColumns, BestPath):- 
         numOfRows(Grid, NumOfColumns, Rows),
         findAllPossiblePaths(Grid, [0,0], NumOfColumns, Rows, [], Paths),
         findAllElements(Grid, Elements),
-        checkForPath(Grid, NumOfColumns, Rows,Paths, Elements, BestPath).
+        checkForPath(Grid, NumOfColumns, Rows,Paths, Elements, BestPath),
+        BestPath \= [].
     
     
     /*Encuentra todos los posibles caminos de la grilla*/
@@ -419,39 +418,40 @@ linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Sum, [Sum2|Camino
         (\+ nextPos([X,Y], NumOfColumns, NumOfRows, _)).
     
     findAllPossiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminosParciales, CaminosFinales):-
-        findall(Paths, possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, [], [], 0, Paths), CaminosParciales1),
+        findall(Paths, posPath(Grid, [X,Y], NumOfColumns, NumOfRows, [], [], 0, Paths), CaminosParciales1),
+        concatenar(CaminosParciales1, CaminosConcatenados),
         nextPos([X,Y], NumOfColumns, NumOfRows, [Xn,Yn]),
         findAllPossiblePaths(Grid, [Xn,Yn], NumOfColumns, NumOfRows, CaminosParciales, CaminosNuevos),
-        append(CaminosParciales1, CaminosNuevos, CaminosFinales).
+        append(CaminosConcatenados, CaminosNuevos, CaminosFinales).
     
     
     /*Primer caso, necesito una posición adyacente igual a la actual*/
-    possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, [], [], Sum, CaminosFinales):-
+    posPath(Grid, [X,Y], NumOfColumns, NumOfRows, [], Caminos, Sum, CaminoFinal):-
         getValue(Grid, [X,Y], NumOfColumns, Val),
         Sum2 is (Sum + Val),
         findIgual(Grid, [X,Y], NumOfColumns, NumOfRows, [X1,Y1]),
-        possiblePaths(Grid, [X1,Y1], NumOfColumns, NumOfRows, [[X,Y]], [], Sum2, CaminosFinales).
+        posPath(Grid, [X1,Y1], NumOfColumns, NumOfRows, [[X,Y]], Caminos, Sum2, CaminoFinal).
     
-    /*Encuentra recursivamente un camino guardando los subcaminos en el proceso*/
-    possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, CaminosActuales, Sum, CaminosFinales):-
-        append(CaminoActual, [[X,Y]], CaminoNuevo),
-        length(CaminoNuevo, L), L>1,
-        getValue(Grid, [X,Y], NumOfColumns, Val),
-        Sum2 is (Sum + Val),
-        append([[Sum2|CaminoNuevo]], CaminosActuales, CaminosNuevos),
-        findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoNuevo, [X1,Y1]),
-        possiblePaths(Grid, [X1,Y1], NumOfColumns, NumOfRows, CaminoNuevo, CaminosNuevos, Sum2, CaminosFinales).
     
-    /*Caso base, si no encuentra posiciones conectables devuelve el camino*/
-    possiblePaths(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, CaminosActuales, Sum, CaminosFinales):-
-        (\+ findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, _)),
-        length(CaminoActual, L), L > 1,
-        getValue(Grid, [X,Y], NumOfColumns, Val),
+    /* Caso base, si no encuentra posiciones conectables devuelve el camino */
+    posPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Caminos, Sum, CaminoFinal) :-
+        \+ findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, _),
+        length(CaminoActual, Len),
+        Len > 1,  % Verificar que el camino tenga más de una coordenada
+        getValue(Grid, [X,Y], NumOfColumns, Val), 
         Sum2 is (Sum + Val),
         append(CaminoActual, [[X,Y]], CaminoParcial),
-        append([[Sum2|CaminoParcial]], CaminosActuales, CaminosFinales).
+        CaminoFinal = [[Sum2|CaminoParcial]|Caminos].
     
-    possiblePaths(_,_,_,_,[], CaminosActuales,_,CaminosActuales).
+    /*Conecta una posición con otra recursivamente hasta formar un camino*/
+    posPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Caminos, Sum, CaminoFinal):-
+        findConectable(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, [X1,Y1]),
+        append(CaminoActual, [[X,Y]], CaminoNuevo),
+        getValue(Grid, [X,Y], NumOfColumns, Val),
+        Sum2 is (Sum + Val),
+        CaminosNuevos = [[Sum2|CaminoNuevo]|Caminos],
+        posPath(Grid, [X1,Y1], NumOfColumns, NumOfRows, CaminoNuevo,  CaminosNuevos,Sum2, CaminoFinal).
+    
     
     checkForPath(_,_,_,_,[],[]).
     
@@ -473,10 +473,11 @@ linealPath(Grid, [X,Y], NumOfColumns, NumOfRows, CaminoActual, Sum, [Sum2|Camino
     
     maxAdyCheck(Grid, NumOfColumns, NumOfRows, [[H|T]|_], Elem, Pos, T):-
         pot2(H, Pot), Pot =:= Elem,
+        length(T,L), L>1,
         join(Grid, NumOfColumns, T, RGrids),
-        last(RGrids, Grid2), getValue(Grid2, Pos, NumOfColumns, Val),
-        Val =:= Elem,
-        findIgual(Grid2, Pos, NumOfColumns, NumOfRows, _).
+        last(RGrids, Grid2), 
+        last(T, LPos),
+        findIgual(Grid2, Pos, NumOfColumns, NumOfRows, LPos).
     
     maxAdyCheck(Grid, NumOfColumns, NumOfRows, [_|Paths], Elem, Pos, FinalPath):-
         maxAdyCheck(Grid, NumOfColumns, NumOfRows, Paths, Elem, Pos, FinalPath).

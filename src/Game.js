@@ -132,6 +132,20 @@ function Game() {
   }
 }
 
+function onClickBestAdy(){
+  if(!waiting && path.length === 0){
+    const gridS = JSON.stringify(grid);
+    const queryS = "findMaxAdy("+gridS+","+numOfColumns+", AdyPath)";
+    pengine.query(queryS, (success, response) =>{
+      if(success){
+        setPath(response['AdyPath']);
+        calcularPrediccion(response['AdyPath']);
+    }
+});
+}
+}
+
+
   if (grid === null) {
     return null;
   }
@@ -166,7 +180,7 @@ function Game() {
           Mejor camino
         </div>
         <div className="powerUp" 
-        onClick={onClickBestPath}
+        onClick={onClickBestAdy}
         style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
           Camino Mejor Adyacente
         </div>
