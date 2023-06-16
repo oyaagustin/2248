@@ -103,9 +103,9 @@ body {
 }
 
 .rise {
-  margin: 0px;
-  padding: 25px;
-  filter:brightness(105%);
+  margin: 2px;
+  transition: .3s;
+  transform:rotate(360deg);
 }
 
 .riseOnHover:hover {

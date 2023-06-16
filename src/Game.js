@@ -165,6 +165,11 @@ function Game() {
         style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
           Mejor camino
         </div>
+        <div className="powerUp" 
+        onClick={onClickBestPath}
+        style={preview === 0? null: {backgroundColor: "#8B0000", cursor:"not-allowed"}}>
+          Camino Mejor Adyacente
+        </div>
       </div>
     </div>
   );
